@@ -145,7 +145,7 @@ main(int argc, char *argv[])
 
 	if (!tflag && !wflag && argc <= optind) {
 usage:
-		swrite(2, "usage: nq [-c] [-q] [-p TIME ] [-w ... | -t ... | CMD...]\n");
+		swrite(2, "usage: nqe [-c] [-q] [-p TIME ] [-w ... | -t ... | CMD...]\n");
 		exit(1);
 	}
 
