@@ -1,4 +1,4 @@
-ALL=nq fq tq
+ALL=nqe fq
 
 CFLAGS=-g -Wall -O2
 
@@ -10,7 +10,7 @@ MANDIR=$(PREFIX)/share/man
 all: $(ALL)
 
 clean: FRC
-	rm -f nq fq
+	rm -f nqe fq ,*.*
 
 check: FRC all
 	prove -v ./tests

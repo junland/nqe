@@ -1,9 +1,9 @@
-.Dd August 25, 2015
-.Dt NQ 1
+.Dd May 17, 2020
+.Dt NQE 1
 .Os
 .Sh NAME
-.Nm nq
-.Nd job queue utility
+.Nm nqe
+.Nd enhanced job queue utility
 .Sh SYNOPSIS
 .Nm
 .Op Fl c
@@ -35,7 +35,7 @@ Exclusive execution is maintained strictly.
 .Pp
 You enqueue(!) new jobs into the queue by running
 .Pp
-.Dl nq Ar command line ...
+.Dl nqe Ar command line ...
 .Pp
 The job id (a file name relative to
 .Ev NQDIR ,
@@ -97,7 +97,7 @@ or
 .Dq Li \&., .
 These files are created according to the following scheme:
 .Pp
-.Dl ,hexadecimal-time-stamp.pid
+.Dl ,milliseconds-unix-time-stamp.pid
 .Sh EXIT STATUS
 The
 .Nm
@@ -116,9 +116,9 @@ targets
 .Ic all ,
 without occupying the terminal:
 .Bd -literal -offset indent
-% nq make clean
-% nq make depends
-% nq make all
+% nqe make clean
+% nqe make depends
+% nqe make all
 % fq
 \&... look at output, can interrupt with C-c any time
 without stopping the build ...
@@ -126,7 +126,7 @@ without stopping the build ...
 .Pp
 Simple download queue, accessible from multiple terminals:
 .Bd -literal -offset indent
-% alias qget='NQDIR=/tmp/downloads nq wget'
+% alias qget='NQDIR=/tmp/downloads nqe wget'
 % alias qwait='NQDIR=/tmp/downloads fq -q'
 window1% qget http://mymirror/big1.iso
 window2% qget http://mymirror/big2.iso
@@ -143,7 +143,7 @@ every run gets a different output file,
 and the command line you ran is logged too.):
 .Bd -literal -offset indent
 % ssh remote
-remote% nq ./run-benchmark
+remote% nqe ./run-benchmark
 ,14f6f3034f8.17035
 remote% ^D
 % ssh remote
@@ -233,7 +233,8 @@ and
 .\" .Sh STANDARDS
 .\" .Sh HISTORY
 .Sh AUTHORS
-.An Leah Neukirchen Aq Mt leah@vuxu.org
+.An John Unland junland2012@gmail.com 
+.An Leah Neukirchen Aq Mt leah@vuxu.org (Orginal)
 .Sh CAVEATS
 All reliable queue status information is in main memory only,
 which makes restarting a job queue after a reboot difficult.

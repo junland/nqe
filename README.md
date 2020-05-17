@@ -55,6 +55,22 @@ different queues for different purposes is encouraged.
 All these operations take worst-case quadratic time in the amount of
 lock files produced, so you should clean them regularly.
 
+```
+pnum = strtol(pvalue, &pvalue, 10);
+		if (*pvalue == '\0') {
+            /* arg is a number */
+			if ( pnum >= 1000000000000 && pnum <= 9999999999999 ) {
+              ms = pnum;
+			}
+			else
+                perror("pnum not in range");
+			    exit(111);
+		}
+		else
+			perror("pnum not a number");
+			exit(111);
+```
+
 ## Examples
 
 Build targets `clean`, `depends`, `all`, without occupying the terminal:

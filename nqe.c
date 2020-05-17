@@ -106,22 +106,25 @@ write_execline(int fd, int argc, char *argv[])
 int
 main(int argc, char *argv[])
 {
-	int64_t ms;
+	long ms = 0;
 	int dirfd = 0, lockfd = 0;
-	int opt = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
+	int opt = 0, pflag = 0, cflag = 0, qflag = 0, tflag = 0, wflag = 0;
+	long pvalue = 0;
 	int pipefd[2];
 	char lockfile[64];
 	pid_t child;
 	struct timeval started;
 	struct dirent *ent;
+	char *eptr;
 	DIR *dir;
 
-	/* timestamp is milliseconds since epoch.  */
-	gettimeofday(&started, NULL);
-	ms = (int64_t)started.tv_sec*1000 + started.tv_usec/1000;
-
-	while ((opt = getopt(argc, argv, "+chqtw")) != -1) {
+	while ((opt = getopt(argc, argv, "+chqp:tw")) != -1) {
 		switch (opt) {
+		case 'p':
+			pflag = 1;
+			pvalue = strtol(optarg, &eptr, 10);
+			long pvalue = (long)optarg;
+			break;
 		case 'c':
 			cflag = 1;
 			break;
@@ -142,13 +145,20 @@ main(int argc, char *argv[])
 
 	if (!tflag && !wflag && argc <= optind) {
 usage:
-		swrite(2, "usage: nq [-c] [-q] [-w ... | -t ... | CMD...]\n");
+		swrite(2, "usage: nq [-c] [-q] [-p TIME ] [-w ... | -t ... | CMD...]\n");
 		exit(1);
 	}
 
 	char *path = getenv("NQDIR");
 	if (!path)
 		path = ".";
+
+	if (pflag) {
+		ms = pvalue;
+	} else {
+		gettimeofday(&started, NULL);
+        ms = (long) started.tv_sec * 1000 + started.tv_usec / 1000;
+	}
 
 	if (mkdir(path, 0777) < 0) {
 		if (errno != EEXIST) {
@@ -168,8 +178,7 @@ usage:
 	}
 
 	if (tflag || wflag) {
-		snprintf(lockfile, sizeof lockfile,
-		    ".,%011" PRIx64 ".%d", ms, getpid());
+		snprintf(lockfile, sizeof lockfile,".,%ld.%d", ms, getpid());
 		goto wait;
 	}
 
@@ -206,8 +215,7 @@ usage:
 		int status;
 
 		/* output expected lockfile name.  */
-		snprintf(lockfile, sizeof lockfile,
-		    ",%011" PRIx64 ".%d", ms, child);
+		snprintf(lockfile, sizeof lockfile,".,%ld.%d", ms, getpid());
 		if (!qflag)
 			dprintf(1, "%s\n", lockfile);
 		close(0);
@@ -243,8 +251,7 @@ usage:
 
 	/* create and lock lockfile.  since this cannot be done in one step,
 	   use a different filename first.  */
-	snprintf(lockfile, sizeof lockfile,
-	    ".,%011" PRIx64 ".%d", ms, getpid());
+	snprintf(lockfile, sizeof lockfile,".,%ld.%d", ms, getpid());
 	lockfd = openat(dirfd, lockfile,
 	    O_CREAT | O_EXCL | O_RDWR | O_APPEND, 0600);
 	if (lockfd < 0) {
@@ -271,7 +278,7 @@ usage:
 	}
 
 wait:
-	if ((tflag || wflag) && argc - optind > 0) {
+	if ((tflag || wflag || pflag) && argc - optind > 0) {
 		/* wait for files passed as command line arguments.  */
 
 		int i;
