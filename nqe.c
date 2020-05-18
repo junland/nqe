@@ -117,6 +117,7 @@ main(int argc, char *argv[])
 	struct dirent *ent;
 	char *eptr;
 	DIR *dir;
+	FILE *file;
 
 	while ((opt = getopt(argc, argv, "+chqp:tw")) != -1) {
 		switch (opt) {
@@ -352,6 +353,15 @@ again:
 
 	setenv("NQJOBID", lockfile+1, 1);
 	setsid();
+	
+	if (file = fopen(argv[optind], "r")) {
+		fclose(file);
+		chmod(argv[optind], S_IRWXU);
+	} else {
+		perror("fopen");
+		exit(111);
+	}
+
 	execvp(argv[optind], argv+optind);
 
 	perror("execvp");
